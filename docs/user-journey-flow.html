@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signup to Transfer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #f7f4ee;
+    --paper-raised: #eeeadf;
+    --ink: #1c1f1d;
+    --ink-soft: #4a4a42;
+    --caption: #756e5c;
+    --hairline: #ddd5c2;
+    --hairline-strong: #c7bda3;
+    --accent: #0f6e5c;
+    --accent-soft: #0f6e5c1a;
+    --warn: #a9711f;
+    --warn-soft: #a9711f14;
+    --method-post: #1f7a52;
+    --method-post-bg: #1f7a5214;
+    --method-get: #2a5f8f;
+    --method-get-bg: #2a5f8f14;
+    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15181a;
+      --paper-raised: #1b1f21;
+      --ink: #ece7d9;
+      --ink-soft: #bcb6a4;
+      --caption: #918a76;
+      --hairline: #2c302c;
+      --hairline-strong: #3c4139;
+      --accent: #34b696;
+      --accent-soft: #34b69626;
+      --warn: #dba24c;
+      --warn-soft: #dba24c1f;
+      --method-post: #4fc491;
+      --method-post-bg: #4fc4911f;
+      --method-get: #6ba3d6;
+      --method-get-bg: #6ba3d61f;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #15181a;
+    --paper-raised: #1b1f21;
+    --ink: #ece7d9;
+    --ink-soft: #bcb6a4;
+    --caption: #918a76;
+    --hairline: #2c302c;
+    --hairline-strong: #3c4139;
+    --accent: #34b696;
+    --accent-soft: #34b69626;
+    --warn: #dba24c;
+    --warn-soft: #dba24c1f;
+    --method-post: #4fc491;
+    --method-post-bg: #4fc4911f;
+    --method-get: #6ba3d6;
+    --method-get-bg: #6ba3d61f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+  }
+
+  .page { max-width: 46rem; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+  }
+  .eyebrow::before { content: ""; width: 1.4rem; height: 1px; background: var(--accent); display: inline-block; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    text-wrap: balance;
+    margin: 0 0 0.9rem;
+    letter-spacing: -0.01em;
+  }
+
+  .lede { color: var(--ink-soft); font-size: 1.02rem; margin: 0 0 3rem; }
+
+  .timeline { display: flex; flex-direction: column; }
+
+  .stage { display: flex; gap: 1.3rem; }
+
+  .stage-rail {
+    width: 2.2rem;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .dot {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    background: var(--paper);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .rail-line { width: 1.5px; flex: 1; background: var(--hairline-strong); margin: 0.2rem 0; min-height: 1rem; }
+
+  .stage-card { flex: 1; min-width: 0; padding-bottom: 2.6rem; }
+
+  .stage-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; flex-wrap: wrap; }
+
+  .http-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    letter-spacing: 0.03em;
+  }
+  .http-badge.post { color: var(--method-post); background: var(--method-post-bg); }
+  .http-badge.get { color: var(--method-get); background: var(--method-get-bg); }
+
+  .stage-head code.path {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  .stage-card h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 0 0 0.7rem;
+  }
+
+  ol.steps {
+    margin: 0 0 0.9rem;
+    padding-left: 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.93rem;
+    color: var(--ink-soft);
+  }
+
+  ol.steps b { color: var(--ink); font-weight: 600; }
+  ol.steps code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 3px;
+    padding: 0.04em 0.35em;
+    color: var(--ink);
+  }
+
+  .outcome {
+    font-size: 0.87rem;
+    color: var(--caption);
+    margin: 0;
+    padding: 0.5rem 0.8rem;
+    background: var(--paper-raised);
+    border-left: 2px solid var(--hairline-strong);
+    border-radius: 0 3px 3px 0;
+  }
+
+  .outcome.gate { border-left-color: var(--warn); color: var(--ink-soft); }
+  .outcome.gate b { color: var(--warn); }
+
+  .mechanism-frame {
+    overflow-x: auto;
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    background: var(--paper-raised);
+    padding: 0.9rem 1rem 0.6rem;
+    margin: 0 0 0.9rem;
+  }
+
+  svg { display: block; height: auto; }
+  .stage-card svg { width: 100%; min-width: 640px; }
+
+  figcaption {
+    font-size: 0.83rem;
+    color: var(--caption);
+    margin: 0 0 0.9rem;
+  }
+
+  .closing {
+    max-width: 42rem;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    border-top: 1px solid var(--hairline);
+    padding-top: 1.6rem;
+    margin-top: 0.5rem;
+  }
+  .closing code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 3px;
+    padding: 0.06em 0.35em;
+    color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <span class="eyebrow">Flow walkthrough</span>
+  <h1>Signup to transfer</h1>
+  <p class="lede">What actually happens, in order, from the moment someone registers to the moment their first transfer lands — traced against the real Actions and Services, not a simplified retelling.</p>
+
+  <div class="timeline">
+
+    <!-- Stage 1 -->
+    <div class="stage">
+      <div class="stage-rail"><div class="dot">1</div><div class="rail-line"></div></div>
+      <div class="stage-card">
+        <div class="stage-head"><span class="http-badge post">POST</span><code class="path">/auth/register</code></div>
+        <h2>Register</h2>
+        <ol class="steps">
+          <li>creates <b>User</b> — <code>status: pending</code></li>
+          <li>creates <b>UserProfile</b></li>
+          <li>looks up the <code>cash</code> WalletType, creates a default <b>Wallet</b> — balance <code>0.00</code>, <code>is_default: true</code></li>
+          <li>creates an <b>Otp</b> row (<code>purpose: registration</code>) and returns the plain code</li>
+        </ol>
+        <p class="outcome gate"><b>Gate:</b> the account exists but is <code>pending</code> — login is refused until it's verified.</p>
+      </div>
+    </div>
+
+    <!-- Stage 2 -->
+    <div class="stage">
+      <div class="stage-rail"><div class="dot">2</div><div class="rail-line"></div></div>
+      <div class="stage-card">
+        <div class="stage-head"><span class="http-badge post">POST</span><code class="path">/auth/verify-otp</code></div>
+        <h2>Verify OTP</h2>
+        <ol class="steps">
+          <li>finds the pending <b>Otp</b> for this user + purpose, checks the code and the 10-minute expiry</li>
+          <li>marks that <b>Otp</b> <code>consumed_at</code></li>
+          <li>updates <b>User</b>: <code>status: pending → active</code>, stamps <code>email_verified_at</code></li>
+        </ol>
+        <p class="outcome">The account is now usable.</p>
+      </div>
+    </div>
+
+    <!-- Stage 3 -->
+    <div class="stage">
+      <div class="stage-rail"><div class="dot">3</div><div class="rail-line"></div></div>
+      <div class="stage-card">
+        <div class="stage-head"><span class="http-badge post">POST</span><code class="path">/auth/login</code></div>
+        <h2>Login</h2>
+        <ol class="steps">
+          <li>checks the password hash, then checks <code>status === active</code> — this is the gate Stage 1 set up</li>
+          <li>creates a Sanctum <b>PersonalAccessToken</b> — 60 minute TTL</li>
+          <li>creates a <b>RefreshToken</b> row — SHA-256 hash, 30 day TTL</li>
+        </ol>
+        <p class="outcome">Client now holds an <code>access_token</code> + <code>refresh_token</code> pair. Every stage below sends the access token as <code>Authorization: Bearer …</code>.</p>
+      </div>
+    </div>
+
+    <!-- Stage 4 -->
+    <div class="stage">
+      <div class="stage-rail"><div class="dot">4</div><div class="rail-line"></div></div>
+      <div class="stage-card">
+        <div class="stage-head"><span class="http-badge get">GET</span><code class="path">/wallets</code></div>
+        <h2>First look: the wallet is already there</h2>
+        <ol class="steps">
+          <li>nothing is created here — this just reads the <b>Wallet</b> Stage 1 already made</li>
+        </ol>
+        <p class="outcome">There's always at least one wallet to transact against before any money has moved.</p>
+      </div>
+    </div>
+
+    <!-- Stage 5 -->
+    <div class="stage">
+      <div class="stage-rail"><div class="dot">5</div><div class="rail-line"></div></div>
+      <div class="stage-card">
+        <div class="stage-head"><span class="http-badge post">POST</span><code class="path">/transactions</code></div>
+        <h2>Create a transaction</h2>
+        <figure>
+          <div class="mechanism-frame">
+            <svg viewBox="0 0 900 130" role="img" aria-label="Creating a transaction: lock the wallet row, read balance_before, compute balance_after, guard against a negative result, create the transaction with both balance snapshots, update the wallet balance, then fire a transaction notification and check the low-balance threshold.">
+              <defs>
+                <marker id="j-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+                </marker>
+              </defs>
+              <!-- 7 steps -->
+              <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+                <rect x="10" y="35" width="112" height="50" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                <text x="66" y="56" text-anchor="middle" fill="currentColor">lock wallet</text>
+                <text x="66" y="70" text-anchor="middle" fill="currentColor" opacity="0.6" font-size="9">FOR UPDATE</text>
+
+                <line x1="122" y1="60" x2="142" y2="60" stroke="currentColor" stroke-width="1.3" marker-end="url(#j-arrow)"/>
+
+                <rect x="142" y="35" width="112" height="50" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                <text x="198" y="56" text-anchor="middle" fill="currentColor">read balance</text>
+                <text x="198" y="70" text-anchor="middle" fill="currentColor" opacity="0.6" font-size="9">balance_before</text>
+
+                <line x1="254" y1="60" x2="274" y2="60" stroke="currentColor" stroke-width="1.3" marker-end="url(#j-arrow)"/>
+
+                <rect x="274" y="35" width="112" height="50" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                <text x="330" y="56" text-anchor="middle" fill="currentColor">compute</text>
+                <text x="330" y="70" text-anchor="middle" fill="currentColor" opacity="0.6" font-size="9">bcadd / bcsub</text>
+
+                <line x1="386" y1="60" x2="406" y2="60" stroke="currentColor" stroke-width="1.3" marker-end="url(#j-arrow)"/>
+
+                <rect x="406" y="20" width="112" height="80" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+                <text x="462" y="46" text-anchor="middle" fill="var(--warn)">guard</text>
+                <text x="462" y="61" text-anchor="middle" fill="var(--warn)" opacity="0.85" font-size="9">negative &amp;</text>
+                <text x="462" y="73" text-anchor="middle" fill="var(--warn)" opacity="0.85" font-size="9">not credit</text>
+                <text x="462" y="88" text-anchor="middle" fill="var(--warn)" font-size="9">→ 422</text>
+
+                <line x1="518" y1="60" x2="538" y2="60" stroke="currentColor" stroke-width="1.3" marker-end="url(#j-arrow)"/>
+
+                <rect x="538" y="35" width="120" height="50" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                <text x="598" y="56" text-anchor="middle" fill="currentColor">create row</text>
+                <text x="598" y="70" text-anchor="middle" fill="currentColor" opacity="0.6" font-size="9">before + after</text>
+
+                <line x1="658" y1="60" x2="678" y2="60" stroke="currentColor" stroke-width="1.3" marker-end="url(#j-arrow)"/>
+
+                <rect x="678" y="35" width="112" height="50" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                <text x="734" y="56" text-anchor="middle" fill="currentColor">update wallet</text>
+                <text x="734" y="70" text-anchor="middle" fill="currentColor" opacity="0.6" font-size="9">live balance</text>
+
+                <line x1="790" y1="60" x2="810" y2="60" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#j-arrow)"/>
+
+                <rect x="810" y="20" width="90" height="80" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="855" y="42" text-anchor="middle" fill="var(--accent)">notify</text>
+                <text x="855" y="58" text-anchor="middle" fill="var(--accent)" opacity="0.85" font-size="9">transaction</text>
+                <text x="855" y="74" text-anchor="middle" fill="var(--accent)" opacity="0.85" font-size="9">+ low-balance</text>
+                <text x="855" y="88" text-anchor="middle" fill="var(--accent)" opacity="0.85" font-size="9">if crossed</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption>All seven steps run inside one <code>DB::transaction</code>. If the guard trips, nothing after it happens either.</figcaption>
+        </figure>
+        <p class="outcome gate"><b>Gate:</b> a <code>cash</code>/<code>bank</code>/<code>savings</code> wallet can never end this step negative — only <code>credit</code> wallets can.</p>
+      </div>
+    </div>
+
+    <!-- Stage 6 -->
+    <div class="stage">
+      <div class="stage-rail"><div class="dot">6</div><div class="rail-line"></div></div>
+      <div class="stage-card">
+        <div class="stage-head"><span class="http-badge post">POST</span><code class="path">/transfers</code></div>
+        <h2>Create a transfer</h2>
+        <ol class="steps">
+          <li>locks <b>both</b> wallets at once, lowest id first, so two simultaneous transfers can never deadlock each other</li>
+          <li>computes both new balances; guards the <code>from</code> side the same way Stage 5 does</li>
+          <li>creates the <b>Transfer</b> row</li>
+          <li>creates <b>Transaction</b> #1 — <code>expense</code> on the <code>from</code> wallet, <code>transfer_id</code> set</li>
+          <li>creates <b>Transaction</b> #2 — <code>income</code> on the <code>to</code> wallet, same <code>transfer_id</code></li>
+          <li>updates <b>both</b> wallet balances</li>
+          <li>fires a "Transfer Completed" <b>Notification</b>, then checks the <code>from</code> wallet for a low-balance crossing</li>
+        </ol>
+        <p class="outcome gate"><b>Gate:</b> the two <b>Transaction</b> rows this step creates can never be edited or deleted individually afterwards — only ever through another transfer.</p>
+      </div>
+    </div>
+
+    <!-- Stage 7 -->
+    <div class="stage">
+      <div class="stage-rail"><div class="dot">7</div></div>
+      <div class="stage-card">
+        <div class="stage-head"><span class="http-badge get">GET</span><code class="path">/notifications</code></div>
+        <h2>See what just happened</h2>
+        <ol class="steps">
+          <li>lists the <b>Notification</b> rows Stages 5 and 6 created — newest first</li>
+          <li><code>POST /notifications/{id}/read</code> stamps <code>read_at</code> on one of them</li>
+          <li><code>GET /dashboard/summary</code> reflects the new balance immediately — it's reading the same <b>Wallet</b> row Stage 5/6 just updated, nothing cached</li>
+        </ol>
+        <p class="outcome">End of the journey: register → verify → login → transact → transfer → see it reflected everywhere else.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="closing">Every "creates" above is a real write in <code>app/Services</code> — nothing here is simplified for the diagram. Stages 5 and 6 are the only ones with branching (the balance guard); everything else is a straight sequence.</p>
+</div>
+</body>
+</html>

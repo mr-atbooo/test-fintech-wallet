@@ -5,6 +5,7 @@
 .env.production
 .env.testing
 .phpactor.json
+.~lock.*#
 .phpunit.result.cache
 /.fleet
 /.idea

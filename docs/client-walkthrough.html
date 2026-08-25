@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>رحلة المستخدم في المحفظة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #f7f4ee;
+    --paper-raised: #eeeadf;
+    --ink: #1c1f1d;
+    --ink-soft: #4a4a42;
+    --caption: #756e5c;
+    --hairline: #ddd5c2;
+    --hairline-strong: #c7bda3;
+    --accent: #0f6e5c;
+    --accent-soft: #0f6e5c1a;
+    --warn: #a9711f;
+    --warn-soft: #a9711f14;
+    --font-display: "Markazi Text", "Traditional Arabic", serif;
+    --font-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15181a;
+      --paper-raised: #1b1f21;
+      --ink: #ece7d9;
+      --ink-soft: #bcb6a4;
+      --caption: #918a76;
+      --hairline: #2c302c;
+      --hairline-strong: #3c4139;
+      --accent: #34b696;
+      --accent-soft: #34b69626;
+      --warn: #dba24c;
+      --warn-soft: #dba24c1f;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #15181a;
+    --paper-raised: #1b1f21;
+    --ink: #ece7d9;
+    --ink-soft: #bcb6a4;
+    --caption: #918a76;
+    --hairline: #2c302c;
+    --hairline-strong: #3c4139;
+    --accent: #34b696;
+    --accent-soft: #34b69626;
+    --warn: #dba24c;
+    --warn-soft: #dba24c1f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.9;
+    direction: rtl;
+  }
+
+  .page { max-width: 46rem; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    direction: ltr;
+    justify-content: flex-end;
+  }
+  .eyebrow::after { content: ""; width: 1.4rem; height: 1px; background: var(--accent); display: inline-block; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 2.7rem);
+    text-wrap: balance;
+    margin: 0 0 1rem;
+  }
+
+  .lede {
+    color: var(--ink-soft);
+    font-size: 1.12rem;
+    max-width: 40rem;
+    margin: 0 0 3rem;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.65rem;
+    margin: 0 0 0.9rem;
+    padding-top: 0.4rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+  }
+
+  h2 .num {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--accent);
+    direction: ltr;
+  }
+
+  section {
+    padding: 2.4rem 0;
+  }
+  section + section { border-top: 1px solid var(--hairline); }
+
+  p { color: var(--ink-soft); font-size: 1.03rem; margin: 0 0 1rem; }
+
+  ul, ol { color: var(--ink-soft); font-size: 1.03rem; padding-inline-start: 1.4rem; margin: 0 0 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+  strong { color: var(--ink); font-weight: 700; }
+
+  .entity {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 3px;
+    padding: 0.1em 0.45em;
+    color: var(--accent);
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  .note {
+    border-inline-start: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 0.9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+    font-size: 0.98rem;
+    color: var(--ink-soft);
+  }
+  .note strong { color: var(--accent); }
+
+  .warn-note {
+    border-inline-start: 3px solid var(--warn);
+    background: var(--warn-soft);
+    padding: 0.9rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.1rem 0;
+    font-size: 0.98rem;
+    color: var(--ink-soft);
+  }
+  .warn-note strong { color: var(--warn); }
+
+  .timeline-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+    margin: 0.5rem 0 0;
+    direction: ltr;
+  }
+  .timeline-strip .step { white-space: nowrap; color: var(--ink); }
+  .timeline-strip .arrow { color: var(--accent); }
+
+  footer {
+    border-top: 1px solid var(--hairline);
+    padding-top: 1.6rem;
+    color: var(--caption);
+    font-size: 0.9rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+</head>
+<body>
+<div class="page">
+  <span class="eyebrow">Client Walkthrough</span>
+  <h1>رحلة المستخدم في تطبيق المحفظة</h1>
+  <p class="lede">شرح كامل لكل جزء في التطبيق — إزاي بيشتغل، وامتى بيتستخدم كل جزء، من لحظة ما حد يسجل لحد ما يبقى بيدير فلوسه بالكامل.</p>
+
+  <section>
+    <h2><span class="num">01</span> التسجيل والدخول</h2>
+    <p>أول ما حد يسجل في التطبيق ببياناته الأساسية (الاسم، الإيميل، كلمة المرور)، النظام بيعمله شغل كتير من ورا الكواليس من غير ما يحس:</p>
+    <ul>
+      <li>بيعمله <strong>حساب مستخدم</strong>، لكن بحالة "قيد التفعيل" — يعني الحساب موجود بس مش هيقدر يدخل بيه لحد ما يفعّله</li>
+      <li>بيعمله <strong>بروفايل شخصي</strong> فاضي، يقدر يكمله بعدين (الاسم، تاريخ الميلاد، المدينة... إلخ)</li>
+      <li>وده الأهم: بيعمله <strong>محفظة نقدية جاهزة برصيد صفر</strong> على طول — عشان أول ما يفعّل حسابه، يلاقي نفسه جاهز يسجل أول عملية له من غير ما يحتاج يعمل خطوة "أنشئ محفظة" بنفسه الأول</li>
+      <li>وبيبعتله <strong>كود تفعيل</strong> (6 أرقام) على إيميله</li>
+    </ul>
+    <p>المستخدم بيدخل الكود ده في شاشة التفعيل، فيتفعّل حسابه، وبعدها يقدر يسجل دخول عادي بالإيميل وكلمة المرور.</p>
+    <div class="note"><strong>ليه ده مهم:</strong> ده معناه إن التطبيق بيوفر على المستخدم خطوة كاملة (إنشاء أول محفظة يدويًا) — بيبدأ معاه محفظة جاهزة من غير ما يطلبها.</div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span> المحافظ — <span class="entity">Wallet</span></h2>
+    <p>المحفظة هي "المكان" اللي فلوس المستخدم موجودة فيه — ممكن تكون محفظة نقدية، حساب بنكي، حساب توفير، أو بطاقة ائتمان. المستخدم يقدر يعمل أكتر من محفظة ويدير كل واحدة لوحدها.</p>
+    <p>على مستوى المحفظة، المستخدم يقدر:</p>
+    <ul>
+      <li><strong>يشوف</strong> كل محافظه ورصيد كل واحدة فيها</li>
+      <li><strong>يعمل محفظة جديدة</strong> ويختار نوعها (نقدي / بنك / توفير / ائتمان)</li>
+      <li><strong>يعدّل</strong> اسم المحفظة، أو يخليها "المحفظة الافتراضية" اللي بيستخدمها كل مرة كاختيار أول</li>
+      <li><strong>يمسح</strong> محفظة مش محتاجها — لكن بشرط رصيدها يبقى صفر الأول</li>
+    </ul>
+    <div class="warn-note"><strong>قاعدة مهمة:</strong> محدش، ولا حتى المستخدم نفسه، يقدر يغيّر رصيد المحفظة مباشرة من شاشة "تعديل المحفظة". الرصيد بيتغيّر بس نتيجة عمليات حقيقية (تسجيل دخل/مصروف، أو تحويل) — عشان أي فلوس تتحرك، يبقى وراها سبب مسجل وموثّق.</div>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span> التصنيفات — <span class="entity">Category</span></h2>
+    <p>التصنيف هو "موضوع" العملية — زي "مرتب" أو "أكل" أو "مواصلات" أو "فواتير". التصنيفات دي جاهزة في التطبيق من الأول (مش المستخدم اللي بيعملها)، ومقسومة نوعين:</p>
+    <ul>
+      <li><strong>تصنيفات دخل</strong>: مرتب، فريلانس، استثمارات، هدايا...</li>
+      <li><strong>تصنيفات مصروف</strong>: أكل وشرب، مواصلات، فواتير، تسوق، صحة...</li>
+    </ul>
+    <p>وبعض التصنيفات ليها تصنيفات فرعية — مثلاً "أكل وشرب" تحتها "مطاعم" و"سوبر ماركت" و"كافيهات"، عشان المستخدم يقدر يكون دقيق أكتر لو حاب.</p>
+    <p>المستخدم بيختار التصنيف المناسب وهو بيسجل أي عملية، والتطبيق بيتأكد إن التصنيف اللي اختاره فعلاً من نفس نوع العملية — يعني مايقدرش يسجل "مصروف" ويحط تحته تصنيف "مرتب" (ده تصنيف دخل مش مصروف).</p>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span> العمليات المالية — <span class="entity">Transaction</span></h2>
+    <p>ده قلب التطبيق. كل مرة المستخدم يقول "استلمت فلوس" أو "صرفت فلوس"، بيسجلها كـ Transaction، ومحدد فيها: من انهي محفظة، تحت انهي تصنيف، المبلغ، وملاحظة لو حاب.</p>
+    <p>لما يضغط "حفظ"، التطبيق بيعمل السلسلة دي كاملة في نفس اللحظة:</p>
+    <div class="timeline-strip">
+      <span class="step">check balance</span><span class="arrow">→</span>
+      <span class="step">calculate new balance</span><span class="arrow">→</span>
+      <span class="step">guard (not negative)</span><span class="arrow">→</span>
+      <span class="step">save transaction</span><span class="arrow">→</span>
+      <span class="step">update wallet</span><span class="arrow">→</span>
+      <span class="step">send notification</span>
+    </div>
+    <ul style="margin-top:1.2rem">
+      <li>يشوف رصيد المحفظة <strong>قبل</strong> العملية</li>
+      <li>يحسب الرصيد <strong>بعد</strong> العملية (يزود لو دخل، يقلل لو مصروف)</li>
+      <li>يتأكد إن المحفظة مش هتبقى سالبة — إلا لو كانت <strong>بطاقة ائتمان</strong>، دي بس المسموح لها تروح بالسالب (زي الواقع بالظبط)</li>
+      <li>يسجل العملية ومعاها الرصيدين (قبل وبعد) — عشان لو حصل أي لبس يوم من الأيام، يبقى فيه سجل واضح مايتلخبطش</li>
+      <li>يحدّث رصيد المحفظة فعليًا</li>
+      <li>يبعت للمستخدم إشعار ("دخل جديد" أو "مصروف جديد")، ولو الرصيد بقى قليل جدًا (أقل من 100) يبعتله تنبيه إضافي</li>
+    </ul>
+    <p>المستخدم يقدر كمان <strong>يعدّل</strong> عملية قديمة (يغيّر المبلغ مثلاً) أو <strong>يمسحها</strong>، والتطبيق بيرجع يصلح رصيد المحفظة تلقائيًا في الحالتين. وطبعًا يقدر يشوف كل عملياته، يبحث فيها، ويفلترها (بالنوع، بالمحفظة، بالتصنيف، أو بالتاريخ).</p>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span> التحويلات — <span class="entity">Transfer</span></h2>
+    <p>التحويل مختلف عن العملية العادية: هو نقل فلوس <strong>من محفظة المستخدم لمحفظة تانية بتاعته هو</strong> (مش لمستخدم تاني) — مثلاً ينقل 500 جنيه من الكاش بتاعه للحساب البنكي.</p>
+    <ul>
+      <li>التطبيق بيخصم من المحفظة الأولى ويضيف للمحفظة التانية <strong>في نفس اللحظة بالظبط</strong> — عشان محدش يشوف لحظة فلوسه اختفت من غير ما تظهر في المكان التاني</li>
+      <li>التحويل ده بيظهر تلقائيًا في سجل العمليات العادي (كمصروف من المحفظة الأولى ودخل في التانية)، عشان المستخدم يشوفه في تاريخه العادي — لكن معلّم إنه "تحويل"</li>
+      <li>وعشان كده، التحويلات <strong>ملهاش تأثير على "إجمالي الدخل" أو "إجمالي المصروف"</strong> في التقارير والداشبورد — لأنها مجرد نقل فلوس المستخدم من جيب لجيب، مش دخل أو مصروف حقيقي جديد</li>
+    </ul>
+    <div class="warn-note"><strong>ملحوظة:</strong> العمليتين الناتجتين عن التحويل محدش يقدر يعدّلهم أو يمسحهم لوحدهم من شاشة العمليات — لازم يتعاملوا مع بعض كوحدة واحدة، عشان محدش يبوّظ توازن الحسابين بالغلط.</div>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span> لوحة التحكم والإشعارات</h2>
+    <p>كل اللي فات بيتجمع في مكانين:</p>
+    <ul>
+      <li><strong>لوحة التحكم</strong>: إجمالي رصيد المستخدم في كل محافظه، إجمالي دخله ومصروفه (في الشهر الحالي أو أي فترة يحددها)، ورسم بياني أسبوعي أو شهري يوضح نمط صرفه</li>
+      <li><strong>الإشعارات</strong>: بتتبعت تلقائيًا مع كل حدث مهم (عملية جديدة، تحويل تم، تنبيه رصيد قليل)، ويقدر يشوفها كلها أو غير المقروءة بس، ويعلّمها كمقروءة واحدة واحدة أو كلها مرة واحدة</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span> الصورة كاملة</h2>
+    <p>لو جمعنا كل حاجة في خط زمني واحد، رحلة المستخدم بتبقى كده:</p>
+    <div class="timeline-strip" style="flex-wrap:wrap">
+      <span class="step">Register</span><span class="arrow">→</span>
+      <span class="step">Verify OTP</span><span class="arrow">→</span>
+      <span class="step">Login</span><span class="arrow">→</span>
+      <span class="step">Wallet (ready)</span><span class="arrow">→</span>
+      <span class="step">Transaction (income/expense)</span><span class="arrow">→</span>
+      <span class="step">Transfer</span><span class="arrow">→</span>
+      <span class="step">Dashboard + Notifications</span>
+    </div>
+    <p style="margin-top:1.2rem">يعني المستخدم بيسجل، بيفعّل حسابه، بيدخل، يلاقي محفظة جاهزة، يبدأ يسجل دخله ومصروفه بتصنيفات واضحة، يقدر ينظم فلوسه بين محافظه المختلفة بالتحويل، ويتابع كل ده لحظة بلحظة من لوحة التحكم والإشعارات.</p>
+  </section>
+
+  <footer>هذا الشرح يعكس السلوك الفعلي للنظام كما تم بناؤه — كل خطوة مذكورة هنا موجودة ومُختبرة في الكود.</footer>
+</div>
+</body>
+</html>

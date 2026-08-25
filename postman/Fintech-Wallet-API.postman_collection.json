@@ -1,0 +1,664 @@
+{
+  "info": {
+    "name": "Fintech Wallet API",
+    "description": "Full REST API collection for the Fintech Wallet & Expense Tracker backend (Laravel 12 + Sanctum).\n\nHow to use:\n1. Update the `base_url` and `server_url` collection variables to match your running server (default assumes `php artisan serve` on port 8000).\n2. Run the **Auth** folder top-to-bottom first (Register -> Verify OTP -> Login). Tokens, OTP codes, and the user email are captured automatically into collection variables via each request's Tests script — no manual copy/paste needed.\n3. Run the rest of the folders in order (Wallets -> Categories -> Transactions -> Transfers -> Dashboard -> Notifications). Each folder captures the ids it creates (wallet_id, transaction_id, transfer_id, ...) for use by later requests.\n4. The whole collection is safe to run end-to-end via the Collection Runner.\n\nNotes:\n- The register/forgot-password responses only include `meta.debug_otp_code` when the API is running in the `local` or `testing` environment (see `APP_ENV` in `.env`) — this is how the collection reads the OTP without needing a real SMS/mail provider.\n- `wallet_type_id` values (1=cash, 2=bank, 3=savings, 4=credit) assume the default `WalletTypeSeeder` order on a freshly migrated database.\n- Set `accept_language` to `ar` to get Arabic validation/error messages back from the API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api/v1" },
+    { "key": "server_url", "value": "http://127.0.0.1:8000" },
+    { "key": "accept_language", "value": "en" },
+    { "key": "user_name", "value": "Postman Test User" },
+    { "key": "user_email", "value": "" },
+    { "key": "user_password", "value": "password123" },
+    { "key": "otp_code", "value": "" },
+    { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "wallet_id", "value": "" },
+    { "key": "second_wallet_id", "value": "" },
+    { "key": "temp_wallet_id", "value": "" },
+    { "key": "income_category_id", "value": "" },
+    { "key": "expense_category_id", "value": "" },
+    { "key": "transaction_id", "value": "" },
+    { "key": "expense_transaction_id", "value": "" },
+    { "key": "transfer_id", "value": "" },
+    { "key": "notification_id", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });",
+          "pm.request.headers.upsert({ key: 'Accept-Language', value: pm.collectionVariables.get('accept_language') || 'en' });"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{server_url}}/up", "host": ["{{server_url}}"], "path": ["up"] }
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{user_name}}\",\n  \"email\": \"postman.test.{{$timestamp}}@example.com\",\n  \"password\": \"{{user_password}}\",\n  \"password_confirmation\": \"{{user_password}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] },
+            "description": "Creates the user (status=pending), a default cash wallet, a profile, and sends a registration OTP. The plain OTP is only returned in `meta.debug_otp_code` outside production."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Register succeeded (201)', () => pm.response.code === 201);",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('user_email', json.data.email);",
+                  "pm.collectionVariables.set('otp_code', json.meta.debug_otp_code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP (Registration)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{user_email}}\",\n  \"code\": \"{{otp_code}}\",\n  \"purpose\": \"registration\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/verify-otp", "host": ["{{base_url}}"], "path": ["auth", "verify-otp"] },
+            "description": "Activates the account (status -> active) and marks the email as verified."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OTP verified, account active', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().data.status).to.eql('active');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+            "description": "Rate-limited to 6 attempts/minute. Returns an access token (Sanctum, 60 min TTL) and a refresh token (30 days)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login succeeded', () => pm.response.code === 200);",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.data.access_token);",
+                  "pm.collectionVariables.set('refresh_token', json.data.refresh_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"] },
+            "description": "Rotates the refresh token: the old one is revoked and a brand new access+refresh pair is issued. Reusing the old refresh_token afterwards will fail with 401."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Token refreshed', () => pm.response.code === 200);",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.data.access_token);",
+                  "pm.collectionVariables.set('refresh_token', json.data.refresh_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{user_email}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/forgot-password", "host": ["{{base_url}}"], "path": ["auth", "forgot-password"] },
+            "description": "Rate-limited to 6 attempts/minute. Issues a password_reset OTP for the account."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OTP sent', () => pm.response.code === 200);",
+                  "pm.collectionVariables.set('otp_code', pm.response.json().meta.debug_otp_code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP (Password Reset)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{user_email}}\",\n  \"code\": \"{{otp_code}}\",\n  \"purpose\": \"password_reset\",\n  \"new_password\": \"{{user_password}}\",\n  \"new_password_confirmation\": \"{{user_password}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/verify-otp", "host": ["{{base_url}}"], "path": ["auth", "verify-otp"] },
+            "description": "Resets the password using the OTP from Forgot Password. Kept as the same {{user_password}} here so the Login request later in the collection still works."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallets",
+      "item": [
+        {
+          "name": "List Wallets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/wallets", "host": ["{{base_url}}"], "path": ["wallets"] },
+            "description": "Right after registration this returns the auto-created default cash wallet."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Wallets fetched', () => pm.response.code === 200);",
+                  "const wallets = pm.response.json().data;",
+                  "if (wallets.length) pm.collectionVariables.set('wallet_id', wallets[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Wallet (Bank)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet_type_id\": 2,\n  \"name\": \"Bank Wallet\",\n  \"currency\": \"USD\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/wallets", "host": ["{{base_url}}"], "path": ["wallets"] },
+            "description": "wallet_type_id=2 is 'bank' (default seeder order: 1=cash, 2=bank, 3=savings, 4=credit). Kept alive for the Transfers folder later — not deleted in this demo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Wallet created', () => pm.response.code === 201);",
+                  "pm.collectionVariables.set('second_wallet_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Wallet (Savings, for delete demo)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet_type_id\": 3,\n  \"name\": \"Temp Savings\",\n  \"currency\": \"USD\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/wallets", "host": ["{{base_url}}"], "path": ["wallets"] },
+            "description": "A throwaway wallet (balance stays 0) used only to demonstrate Delete Wallet below without disturbing the wallet used by later folders."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Wallet created', () => pm.response.code === 201);",
+                  "pm.collectionVariables.set('temp_wallet_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Show Wallet",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/wallets/{{wallet_id}}", "host": ["{{base_url}}"], "path": ["wallets", "{{wallet_id}}"] }
+          }
+        },
+        {
+          "name": "Update Wallet",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"My Cash Wallet\"\n}" },
+            "url": { "raw": "{{base_url}}/wallets/{{wallet_id}}", "host": ["{{base_url}}"], "path": ["wallets", "{{wallet_id}}"] },
+            "description": "Note: `balance` cannot be set directly here by design — it only changes via Transactions/Transfers."
+          }
+        },
+        {
+          "name": "Delete Wallet",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/wallets/{{temp_wallet_id}}", "host": ["{{base_url}}"], "path": ["wallets", "{{temp_wallet_id}}"] },
+            "description": "Deletes the temp savings wallet (balance=0, so this succeeds). Deleting a wallet with a non-zero balance returns 422."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Categories fetched', () => pm.response.code === 200);",
+                  "const categories = pm.response.json().data;",
+                  "const income = categories.find(c => c.type === 'income');",
+                  "const expense = categories.find(c => c.type === 'expense');",
+                  "if (income) pm.collectionVariables.set('income_category_id', income.id);",
+                  "if (expense) pm.collectionVariables.set('expense_category_id', expense.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Categories (type=income)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories?type=income",
+              "host": ["{{base_url}}"],
+              "path": ["categories"],
+              "query": [{ "key": "type", "value": "income" }]
+            }
+          }
+        },
+        {
+          "name": "Show Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/categories/{{income_category_id}}", "host": ["{{base_url}}"], "path": ["categories", "{{income_category_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "List Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/transactions?per_page=20", "host": ["{{base_url}}"], "path": ["transactions"], "query": [{ "key": "per_page", "value": "20" }] }
+          }
+        },
+        {
+          "name": "Create Income Transaction",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet_id\": {{wallet_id}},\n  \"category_id\": {{income_category_id}},\n  \"type\": \"income\",\n  \"amount\": 1000,\n  \"note\": \"Salary\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/transactions", "host": ["{{base_url}}"], "path": ["transactions"] },
+            "description": "Records balance_before/balance_after and updates the wallet balance atomically. Also auto-fires a 'New Income' notification."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Transaction created', () => pm.response.code === 201);",
+                  "pm.collectionVariables.set('transaction_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Expense Transaction",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet_id\": {{wallet_id}},\n  \"category_id\": {{expense_category_id}},\n  \"type\": \"expense\",\n  \"amount\": 150,\n  \"note\": \"Groceries\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/transactions", "host": ["{{base_url}}"], "path": ["transactions"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Transaction created', () => pm.response.code === 201);",
+                  "pm.collectionVariables.set('expense_transaction_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Transactions (Filtered)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/transactions?type=expense&wallet_id={{wallet_id}}&search=groceries&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["transactions"],
+              "query": [
+                { "key": "type", "value": "expense" },
+                { "key": "wallet_id", "value": "{{wallet_id}}" },
+                { "key": "search", "value": "groceries" },
+                { "key": "per_page", "value": "10" }
+              ]
+            },
+            "description": "Demonstrates type/wallet_id/search filtering + pagination. Other supported filters: category_id, date_from, date_to."
+          }
+        },
+        {
+          "name": "Show Transaction",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/transactions/{{transaction_id}}", "host": ["{{base_url}}"], "path": ["transactions", "{{transaction_id}}"] }
+          }
+        },
+        {
+          "name": "Update Transaction",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 1200\n}" },
+            "url": { "raw": "{{base_url}}/transactions/{{transaction_id}}", "host": ["{{base_url}}"], "path": ["transactions", "{{transaction_id}}"] },
+            "description": "Bumps the income transaction from 1000 to 1200. The service reverses the old effect and reapplies the new one, recalculating balance_before/after."
+          }
+        },
+        {
+          "name": "Delete Transaction",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/transactions/{{expense_transaction_id}}", "host": ["{{base_url}}"], "path": ["transactions", "{{expense_transaction_id}}"] },
+            "description": "Deletes the expense transaction (reversing an expense always increases the balance, so this is always safe for a cash wallet). Soft-deleted afterwards."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transfers",
+      "item": [
+        {
+          "name": "List Transfers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/transfers", "host": ["{{base_url}}"], "path": ["transfers"] }
+          }
+        },
+        {
+          "name": "Create Transfer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_wallet_id\": {{wallet_id}},\n  \"to_wallet_id\": {{second_wallet_id}},\n  \"amount\": 300,\n  \"note\": \"Moving to bank\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/transfers", "host": ["{{base_url}}"], "path": ["transfers"] },
+            "description": "Moves money between the user's own wallets atomically. Also creates two mirror entries in Transactions (expense on from_wallet, income on to_wallet) linked via transfer_id — those cannot be edited/deleted directly from the Transactions endpoints."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Transfer completed', () => pm.response.code === 201);",
+                  "pm.collectionVariables.set('transfer_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Show Transfer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/transfers/{{transfer_id}}", "host": ["{{base_url}}"], "path": ["transfers", "{{transfer_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Summary (current month)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/dashboard/summary", "host": ["{{base_url}}"], "path": ["dashboard", "summary"] },
+            "description": "total_balance = sum across all wallets. total_income/total_expense are scoped to this month by default and exclude transfer mirror entries."
+          }
+        },
+        {
+          "name": "Summary (custom date range)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/summary?date_from=2026-01-01&date_to=2026-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "summary"],
+              "query": [
+                { "key": "date_from", "value": "2026-01-01" },
+                { "key": "date_to", "value": "2026-12-31" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Chart (weekly)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/chart?period=weekly",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "chart"],
+              "query": [{ "key": "period", "value": "weekly" }]
+            },
+            "description": "Last 7 days, gap-filled (days with no activity return income=0, expense=0)."
+          }
+        },
+        {
+          "name": "Chart (monthly)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/chart?period=monthly",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "chart"],
+              "query": [{ "key": "period", "value": "monthly" }]
+            },
+            "description": "Last 12 months, gap-filled."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"] },
+            "description": "By this point you should see notifications auto-generated by the earlier Transactions/Transfers requests (New Income, New Expense, Transfer Completed, and possibly Low Balance Warning)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Notifications fetched', () => pm.response.code === 200);",
+                  "const notifications = pm.response.json().data;",
+                  "if (notifications.length) pm.collectionVariables.set('notification_id', notifications[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Unread Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications?unread_only=1",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"],
+              "query": [{ "key": "unread_only", "value": "1" }]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{base_url}}/notifications/{{notification_id}}/read", "host": ["{{base_url}}"], "path": ["notifications", "{{notification_id}}", "read"] }
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{base_url}}/notifications/read-all", "host": ["{{base_url}}"], "path": ["notifications", "read-all"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] },
+        "description": "Revokes the current access token. Deliberately placed as the LAST item in the whole collection so every other folder still has a valid session when it runs."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Logout succeeded', () => pm.response.code === 200);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

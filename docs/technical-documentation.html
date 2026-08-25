@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fintech Wallet API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #f7f4ee;
+    --paper-raised: #eeeadf;
+    --ink: #1c1f1d;
+    --ink-soft: #4a4a42;
+    --caption: #756e5c;
+    --hairline: #ddd5c2;
+    --hairline-strong: #c7bda3;
+    --accent: #0f6e5c;
+    --accent-soft: #0f6e5c1a;
+    --accent-ink: #ffffff;
+    --code-bg: #efe9d9;
+    --code-border: #ddd0ac;
+    --method-get: #2a5f8f;
+    --method-get-bg: #2a5f8f14;
+    --method-post: #1f7a52;
+    --method-post-bg: #1f7a5214;
+    --method-put: #a9711f;
+    --method-put-bg: #a9711f14;
+    --method-delete: #a13a3a;
+    --method-delete-bg: #a13a3a14;
+    --pill-public-bg: #756e5c14;
+    --pill-public-fg: #6b6450;
+    --pill-bearer-bg: #0f6e5c14;
+    --pill-bearer-fg: #0f6e5c;
+    --shadow-card: 0 1px 2px rgba(28, 31, 29, 0.06), 0 2px 10px rgba(28, 31, 29, 0.04);
+    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15181a;
+      --paper-raised: #1b1f21;
+      --ink: #ece7d9;
+      --ink-soft: #bcb6a4;
+      --caption: #918a76;
+      --hairline: #2c302c;
+      --hairline-strong: #3c4139;
+      --accent: #34b696;
+      --accent-soft: #34b69626;
+      --accent-ink: #0b1210;
+      --code-bg: #1e2320;
+      --code-border: #33392f;
+      --method-get: #6ba3d6;
+      --method-get-bg: #6ba3d61f;
+      --method-post: #4fc491;
+      --method-post-bg: #4fc4911f;
+      --method-put: #dba24c;
+      --method-put-bg: #dba24c1f;
+      --method-delete: #e07a7a;
+      --method-delete-bg: #e07a7a1f;
+      --pill-public-bg: #918a761f;
+      --pill-public-fg: #b3ac97;
+      --pill-bearer-bg: #34b69626;
+      --pill-bearer-fg: #4fd1ae;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 2px 12px rgba(0,0,0,0.25);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #15181a;
+    --paper-raised: #1b1f21;
+    --ink: #ece7d9;
+    --ink-soft: #bcb6a4;
+    --caption: #918a76;
+    --hairline: #2c302c;
+    --hairline-strong: #3c4139;
+    --accent: #34b696;
+    --accent-soft: #34b69626;
+    --accent-ink: #0b1210;
+    --code-bg: #1e2320;
+    --code-border: #33392f;
+    --method-get: #6ba3d6;
+    --method-get-bg: #6ba3d61f;
+    --method-post: #4fc491;
+    --method-post-bg: #4fc4911f;
+    --method-put: #dba24c;
+    --method-put-bg: #dba24c1f;
+    --method-delete: #e07a7a;
+    --method-delete-bg: #e07a7a1f;
+    --pill-public-bg: #918a761f;
+    --pill-public-fg: #b3ac97;
+    --pill-bearer-bg: #34b69626;
+    --pill-bearer-fg: #4fd1ae;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 2px 12px rgba(0,0,0,0.25);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 27px,
+      color-mix(in srgb, var(--ink) 3%, transparent) 28px
+    );
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  code, pre, .mono, .tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead {
+    border-bottom: 1px solid var(--hairline);
+    padding: 2.75rem 2rem 2.25rem;
+  }
+
+  .masthead-inner {
+    max-width: 74rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 1.4rem;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .masthead h1 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    line-height: 1.08;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .masthead p.lede {
+    max-width: 52rem;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .stack-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+  }
+
+  .pill {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 3px;
+    border: 1px solid var(--hairline-strong);
+    color: var(--ink-soft);
+    background: var(--paper-raised);
+    white-space: nowrap;
+  }
+
+  /* ---------- Shell layout ---------- */
+
+  .shell {
+    max-width: 74rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: 3rem;
+    padding: 2.5rem 2rem 6rem;
+    align-items: start;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    font-size: 0.88rem;
+  }
+
+  nav.toc .toc-title {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.72rem;
+    color: var(--caption);
+    margin-bottom: 0.9rem;
+  }
+
+  nav.toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: toc;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+  }
+
+  nav.toc li { counter-increment: toc; }
+
+  nav.toc a {
+    display: flex;
+    gap: 0.55rem;
+    align-items: baseline;
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 0.32rem 0;
+    border-left: 2px solid transparent;
+    padding-left: 0.7rem;
+    margin-left: -0.7rem;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  nav.toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--caption);
+    flex-shrink: 0;
+  }
+
+  nav.toc a:hover, nav.toc a:focus-visible {
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+
+  main { min-width: 0; }
+
+  section {
+    padding-top: 3rem;
+    margin-top: -1.5rem;
+    border-top: 1px solid transparent;
+  }
+
+  section + section { border-top: 1px solid var(--hairline); }
+
+  section h2 {
+    font-size: 1.55rem;
+    margin: 0 0 0.3rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+  }
+
+  section h2 .num {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  section h3 {
+    font-size: 1.12rem;
+    margin: 2rem 0 0.6rem;
+    font-weight: 600;
+  }
+
+  section > p, section > ul, section > ol {
+    max-width: 42rem;
+    color: var(--ink-soft);
+  }
+
+  section > p code, li code, td code { color: var(--ink); }
+
+  p, li { max-width: 42rem; }
+
+  .prose-wide { max-width: none; }
+
+  strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Tables ---------- */
+
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1.1rem 0 1.6rem;
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.92rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.62rem 0.9rem;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--caption);
+    background: var(--paper-raised);
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  td.mono, th.mono { font-family: var(--font-mono); font-size: 0.88rem; }
+
+  /* ---------- Method + auth pills ---------- */
+
+  .method {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 0.16rem 0.5rem;
+    border-radius: 3px;
+    letter-spacing: 0.03em;
+  }
+  .method-get { color: var(--method-get); background: var(--method-get-bg); }
+  .method-post { color: var(--method-post); background: var(--method-post-bg); }
+  .method-put { color: var(--method-put); background: var(--method-put-bg); }
+  .method-delete { color: var(--method-delete); background: var(--method-delete-bg); }
+
+  .auth-pill {
+    display: inline-block;
+    font-size: 0.74rem;
+    font-family: var(--font-mono);
+    padding: 0.16rem 0.55rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .auth-public { color: var(--pill-public-fg); background: var(--pill-public-bg); }
+  .auth-bearer { color: var(--pill-bearer-fg); background: var(--pill-bearer-bg); }
+
+  /* ---------- Code blocks ---------- */
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 4px;
+    padding: 1rem 1.15rem;
+    overflow-x: auto;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    max-width: none;
+    color: var(--ink);
+  }
+
+  code {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 3px;
+    padding: 0.08em 0.4em;
+    font-size: 0.86em;
+  }
+
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1em;
+  }
+
+  /* ---------- Callouts ---------- */
+
+  .callout {
+    max-width: 42rem;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 0.85rem 1.1rem;
+    border-radius: 0 4px 4px 0;
+    margin: 1.3rem 0;
+    font-size: 0.93rem;
+    color: var(--ink-soft);
+  }
+
+  .callout strong { color: var(--ink); }
+
+  .callout-title {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  /* ---------- Definition-style cards for enums/entities ---------- */
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+    gap: 0.9rem;
+    margin: 1.2rem 0 1.6rem;
+  }
+
+  .entity-card {
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 0.95rem 1.05rem;
+    background: var(--paper-raised);
+  }
+
+  .entity-card h4 {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .entity-card .flag {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--caption);
+    border: 1px solid var(--hairline-strong);
+    border-radius: 3px;
+    padding: 0.05rem 0.4rem;
+    margin-left: 0.4rem;
+  }
+
+  .entity-card dl {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+  }
+
+  .entity-card dt {
+    font-family: var(--font-mono);
+    color: var(--ink);
+    display: inline;
+  }
+
+  .entity-card dd {
+    display: inline;
+    margin: 0 0 0 0.35rem;
+    color: var(--caption);
+  }
+
+  .entity-card .row { display: block; }
+
+  /* ---------- Footer ---------- */
+
+  footer {
+    max-width: 74rem;
+    margin: 0 auto;
+    padding: 2rem 2rem 3rem;
+    color: var(--caption);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--hairline);
+  }
+
+  @media (max-width: 880px) {
+    .shell { grid-template-columns: 1fr; padding: 1.5rem 1.25rem 4rem; gap: 2rem; }
+    nav.toc { position: static; max-height: none; columns: 2; gap: 1.5rem; }
+    .masthead { padding: 2rem 1.25rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <span class="eyebrow">Technical Reference</span>
+    <h1>Fintech Wallet API</h1>
+    <p class="lede">A Laravel 12 REST backend for a personal finance app — wallets, transactions, transfers, budgeting categories, dashboard analytics, and notifications — built as a learning project paired with a Flutter Clean Architecture frontend.</p>
+    <div class="stack-pills">
+      <span class="pill">Laravel 12</span>
+      <span class="pill">PHP 8.2</span>
+      <span class="pill">MySQL</span>
+      <span class="pill">Sanctum + refresh tokens</span>
+      <span class="pill">/api/v1</span>
+      <span class="pill">29 automated tests</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#data-model">Data model</a></li>
+      <li><a href="#enums">Enum reference</a></li>
+      <li><a href="#auth">Auth &amp; authorization</a></li>
+      <li><a href="#business-logic">Business logic</a></li>
+      <li><a href="#api-reference">API reference</a></li>
+      <li><a href="#envelope">Envelope &amp; localization</a></li>
+      <li><a href="#testing">Testing</a></li>
+      <li><a href="#getting-started">Getting started</a></li>
+      <li><a href="#limitations">Known limitations</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="overview">
+      <h2><span class="num">01</span> Overview</h2>
+      <p>This document is the technical reference for the backend: architecture, data model, business rules, and the full API surface. It assumes familiarity with Laravel but not with this specific codebase.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>Choice</th></tr></thead>
+          <tbody>
+            <tr><td>Framework</td><td class="mono">Laravel 12</td></tr>
+            <tr><td>Language</td><td class="mono">PHP 8.2</td></tr>
+            <tr><td>Database</td><td class="mono">MySQL</td></tr>
+            <tr><td>Auth</td><td>Laravel Sanctum (access tokens) + a custom <code>refresh_tokens</code> table</td></tr>
+            <tr><td>API style</td><td>REST, versioned under <code>/api/v1</code>, JSON envelope <code>{data, message, meta?, links?}</code></td></tr>
+            <tr><td>Localization</td><td><code>Accept-Language</code> header (<code>en</code>/<code>ar</code>)</td></tr>
+            <tr><td>Testing</td><td>PHPUnit, Feature tests against a dedicated MySQL test database</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2><span class="num">02</span> Architecture</h2>
+      <p>Strict layering, enforced by convention across every feature:</p>
+      <p class="mono" style="font-size:1.05rem; color:var(--ink);">Controller → Action → Service → Repository → Model</p>
+      <ul>
+        <li><strong>Controller</strong> — resolves the request, calls one Action, wraps the result in a Resource + <code>ApiResponse</code>. No business logic ever lives here.</li>
+        <li><strong>Action</strong> — a single-purpose, invokable class (<code>__invoke</code>) per use case (e.g. <code>CreateTransactionAction</code>). Thin orchestration; usually just forwards to a Service.</li>
+        <li><strong>Service</strong> — where business rules live (balance math, default-wallet switching, OTP generation, notification triggering). Services can depend on other Services for cross-cutting concerns.</li>
+        <li><strong>Repository</strong> — the only place that talks to Eloquent for a given model's persistence/queries.</li>
+        <li><strong>Model</strong> — Eloquent models with enum casts, relationships, and (for a few) an <code>$attributes</code> default so a freshly-<code>create()</code>d instance already reflects its DB-level default in memory.</li>
+      </ul>
+
+      <pre class="prose-wide"><code>app/
+├── Http/
+│   ├── Controllers/Api/V1/{Auth,Wallet,Transaction,Transfer,Category,Dashboard,Notification}/
+│   ├── Requests/Api/V1/{Auth,Wallet,Transaction,Transfer,Category,Dashboard,Notification}/
+│   ├── Resources/
+│   └── Middleware/SetLocaleFromHeader.php
+├── Models/
+├── Services/{Auth,Wallet,Transaction,Transfer,Category,Dashboard,Notification}/
+├── Repositories/
+├── Actions/{Auth,Wallet,Transaction,Transfer,Category,Dashboard,Notification}/
+├── Enums/
+├── Exceptions/{Api,Auth,Wallet,Transaction}/
+└── Policies/</code></pre>
+
+      <h3>Cross-cutting pieces</h3>
+      <ul>
+        <li><strong>App\Support\ApiResponse</strong> — builds the envelope for every response. Resolves a <code>JsonResource</code>'s payload via <code>-&gt;resolve()</code>, not by round-tripping through <code>response()-&gt;getData(true)['data']</code>, which breaks if the resource itself has a field literally named <code>data</code>.</li>
+        <li><strong>App\Http\Requests\Api\V1\ApiFormRequest</strong> — base Form Request; overrides <code>failedValidation()</code> to return the same JSON envelope (422, <code>errors</code> keyed by field).</li>
+        <li><strong>App\Exceptions\Api\ApiException</strong> — base for all domain exceptions. Implements <code>ShouldntReport</code>, so expected 4xx business failures never spam the error log — only genuine 5xx failures do.</li>
+        <li><strong>bootstrap/app.php</strong> — registers <code>api.php</code> routing, appends <code>SetLocaleFromHeader</code> to the <code>api</code> middleware group, calls <code>redirectGuestsTo(fn () =&gt; null)</code> so an unauthenticated hit on a protected route always returns 401 JSON instead of attempting a redirect to a non-existent <code>login</code> route, and renders validation/auth/not-found/generic exceptions consistently as the same envelope for any <code>api/*</code> request.</li>
+      </ul>
+    </section>
+
+    <section id="data-model">
+      <h2><span class="num">03</span> Data model</h2>
+      <p>All tables use bigint <code>id</code> PKs and <code>created_at</code>/<code>updated_at</code> timestamps unless noted.</p>
+
+      <div class="card-grid">
+        <div class="entity-card">
+          <h4>users <span class="flag">soft delete</span></h4>
+          <dl>
+            <div class="row"><dt>name, email, phone</dt><dd>email &amp; phone unique</dd></div>
+            <div class="row"><dt>password</dt><dd>hashed cast</dd></div>
+            <div class="row"><dt>status</dt><dd>UserStatus enum</dd></div>
+            <div class="row"><dt>email/phone_verified_at</dt><dd>nullable</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>user_profiles</h4>
+          <dl>
+            <div class="row"><dt>1:1</dt><dd>with users</dd></div>
+            <div class="row"><dt>fields</dt><dd>first/last name, avatar, dob, gender, address, city, country</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>wallet_types</h4>
+          <dl>
+            <div class="row"><dt>code</dt><dd>WalletTypeCode enum</dd></div>
+            <div class="row"><dt>seeded</dt><dd>WalletTypeSeeder, once</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>wallets <span class="flag">soft delete</span></h4>
+          <dl>
+            <div class="row"><dt>user_id, wallet_type_id</dt><dd>FKs</dd></div>
+            <div class="row"><dt>balance</dt><dd>decimal(15,2)</dd></div>
+            <div class="row"><dt>is_default</dt><dd>exactly one true per user</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>categories</h4>
+          <dl>
+            <div class="row"><dt>parent_id</dt><dd>self-referencing</dd></div>
+            <div class="row"><dt>type</dt><dd>TransactionType enum — shared</dd></div>
+            <div class="row"><dt>seeded</dt><dd>16 parents / 6 children</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>transactions <span class="flag">soft delete</span></h4>
+          <dl>
+            <div class="row"><dt>transfer_id</dt><dd>nullable — set on mirror rows only</dd></div>
+            <div class="row"><dt>balance_before/after</dt><dd>the audit trail</dd></div>
+            <div class="row"><dt>indexes</dt><dd>(wallet_id, transaction_date), (user_id, type)</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>transfers</h4>
+          <dl>
+            <div class="row"><dt>from/to_wallet_id</dt><dd>both FK wallets</dd></div>
+            <div class="row"><dt>mutability</dt><dd>immutable — no update/delete route</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>notifications</h4>
+          <dl>
+            <div class="row"><dt>type</dt><dd>NotificationType enum</dd></div>
+            <div class="row"><dt>note</dt><dd>custom table, unrelated to Laravel's built-in channel</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>devices</h4>
+          <dl>
+            <div class="row"><dt>fcm_token, platform</dt><dd>scaffolded, not yet wired</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>refresh_tokens</h4>
+          <dl>
+            <div class="row"><dt>token</dt><dd>SHA-256 hash, unique + indexed</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>otps</h4>
+          <dl>
+            <div class="row"><dt>code</dt><dd>bcrypt-hashed</dd></div>
+            <div class="row"><dt>note</dt><dd>not in original spec — added for forgot-password/verify-otp</dd></div>
+          </dl>
+        </div>
+        <div class="entity-card">
+          <h4>personal_access_tokens</h4>
+          <dl>
+            <div class="row"><dt>note</dt><dd>standard Sanctum table; has expires_at for TTL enforcement</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section id="enums">
+      <h2><span class="num">04</span> Enum reference</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Enum</th><th>Values</th><th>Used by</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">UserStatus</td><td class="mono">active, inactive, blocked, pending</td><td>users.status</td></tr>
+            <tr><td class="mono">WalletStatus</td><td class="mono">active, inactive</td><td>wallets.status</td></tr>
+            <tr><td class="mono">WalletTypeCode</td><td class="mono">cash, bank, savings, credit</td><td>wallet_types.code (<code>allowsNegativeBalance()</code> true only for credit)</td></tr>
+            <tr><td class="mono">TransactionType</td><td class="mono">income, expense</td><td>transactions.type <strong>and</strong> categories.type</td></tr>
+            <tr><td class="mono">TransactionStatus</td><td class="mono">completed, pending, failed</td><td>transactions.status <strong>and</strong> transfers.status</td></tr>
+            <tr><td class="mono">NotificationType</td><td class="mono">transaction, low_balance, payment_success, payment_failed</td><td>notifications.type (payment_* reserved, unused)</td></tr>
+            <tr><td class="mono">OtpPurpose</td><td class="mono">registration, password_reset</td><td>otps.purpose</td></tr>
+            <tr><td class="mono">Gender</td><td class="mono">male, female, other</td><td>user_profiles.gender</td></tr>
+            <tr><td class="mono">DevicePlatform</td><td class="mono">ios, android, web</td><td>devices.platform</td></tr>
+            <tr><td class="mono">Status</td><td class="mono">active, inactive</td><td>generic — wallet_types.status, categories.status</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="auth">
+      <h2><span class="num">05</span> Auth &amp; authorization</h2>
+
+      <h3>Token model</h3>
+      <p>Two tokens are issued together on login / register-verify / refresh:</p>
+      <ul>
+        <li><strong>Access token</strong> — a Sanctum personal access token, <code>Bearer</code>-authenticated, <strong>60 minute</strong> TTL, enforced via Sanctum's own <code>expires_at</code> column.</li>
+        <li><strong>Refresh token</strong> — a 64-char random string, <strong>30 day</strong> TTL, stored <strong>SHA-256 hashed</strong> — not bcrypt, since it's a high-entropy random value rather than a user-chosen secret, so a fast deterministic hash gives an indexed O(1) lookup (the same approach Sanctum itself uses).</li>
+      </ul>
+      <p><code>POST /auth/refresh</code> <strong>rotates</strong>: the old refresh token is revoked and a brand-new pair is issued. Reusing a spent refresh token returns 401.</p>
+
+      <h3>OTP flow</h3>
+      <ul>
+        <li>6-digit numeric code, bcrypt-hashed, <strong>10 minute</strong> TTL. Generating a new one invalidates any pending code for the same (user, purpose).</li>
+        <li><strong>Registration</strong>: account starts <code>pending</code>; <code>verify-otp</code> with <code>purpose=registration</code> activates it and stamps the verified-at timestamp.</li>
+        <li><strong>Password reset</strong>: <code>forgot-password</code> issues an OTP; <code>verify-otp</code> with <code>purpose=password_reset</code> requires <code>new_password</code> in the same call — there's no separate reset-password endpoint.</li>
+      </ul>
+      <div class="callout">
+        <span class="callout-title">Development convenience</span>
+        Register/forgot-password responses include the plain code in <code>meta.debug_otp_code</code> only when <code>APP_ENV</code> is <code>local</code> or <code>testing</code> — there's no real SMS/mail provider wired up, and this is what both the Postman collection and the automated tests read instead of scraping logs.
+      </div>
+
+      <h3>Authorization</h3>
+      <p>Ownership is enforced via Policies (auto-discovered by naming convention): <code>WalletPolicy</code>, <code>TransactionPolicy</code>, <code>TransferPolicy</code> (view-only), <code>NotificationPolicy</code> (update-only). Each checks <code>$model-&gt;user_id === $user-&gt;id</code>. Cross-user access returns 403; cross-user <em>references</em> in a request body (someone else's <code>wallet_id</code>) are rejected at validation time via a scoped <code>Rule::exists</code>, reading as "doesn't exist" rather than leaking ownership.</p>
+
+      <h3>Rate limiting</h3>
+      <p><code>login</code>, <code>forgot-password</code>, and <code>verify-otp</code> are each throttled to 6/min with <strong>distinct</strong> limiter keys (<code>throttle:6,1,login</code>, etc). Laravel's default throttle middleware keys solely by IP when no third argument is given — without the distinct suffixes, all three routes would share one bucket, and a user rate-limited out of login attempts would also be locked out of requesting a password-reset OTP.</p>
+    </section>
+
+    <section id="business-logic">
+      <h2><span class="num">06</span> Business logic</h2>
+
+      <h3>6.1 — Transaction balance math</h3>
+      <p>All arithmetic uses <code>bcadd</code>/<code>bcsub</code>/<code>bcmul</code>/<code>bccomp</code> on string amounts — never float — to avoid floating-point drift on money.</p>
+      <p><strong>Create</strong> locks the wallet row (<code>SELECT ... FOR UPDATE</code> inside <code>DB::transaction</code>), reads <code>balance_before</code>, computes <code>balance_after</code>, guards against a negative result, writes both snapshots, then updates the live balance.</p>
+      <p><strong>Update</strong> is the tricky one. If amount/type/wallet_id changes: same-wallet reverses the old signed delta from the wallet's <em>current</em> balance then reapplies the new one (only the final result is guarded); cross-wallet locks <strong>both</strong> wallets in ascending-id order to avoid deadlocks, reverses on the old wallet, applies on the new one, guards both independently.</p>
+      <p><strong>Delete</strong> reverses the transaction's effect on the wallet's current balance — also guarded, since removing an income that's since been partly spent could otherwise drive the balance negative.</p>
+      <p>A transaction with <code>transfer_id !== null</code> can't be updated or deleted through these endpoints at all (<code>TransferLinkedTransactionException</code>, 422) — editing one side of a transfer without the other would corrupt the ledger.</p>
+
+      <h3>6.2 — The negative-balance guard</h3>
+      <pre><code>if (bccomp($balanceAfter, '0', 2) &lt; 0 &amp;&amp; ! $wallet-&gt;walletType-&gt;code-&gt;allowsNegativeBalance()) {
+    throw new InsufficientBalanceException();
+}</code></pre>
+      <p>Only <code>credit</code>-type wallets may go negative. One guard, reused by transaction create/update/delete and by transfers.</p>
+
+      <h3>6.3 — Wallet default-switching</h3>
+      <ul>
+        <li>A user's first wallet is always forced default, regardless of what's passed in.</li>
+        <li>Setting <code>is_default: true</code> on any wallet clears it from every other wallet for that user, in one transaction.</li>
+        <li>Deleting the default wallet (only possible once its balance is 0) auto-promotes the oldest remaining wallet to default.</li>
+        <li>A wallet with a non-zero balance can't be deleted (<code>WalletHasBalanceException</code>, 422).</li>
+      </ul>
+
+      <h3>6.4 — Transfers</h3>
+      <p>One atomic operation across three tables: lock both wallets (ascending id order) → debit <code>from_wallet</code>, guard → credit <code>to_wallet</code> → insert the <code>transfers</code> row → insert <strong>two mirror <code>transactions</code> rows</strong> (an expense on <code>from_wallet</code>, an income on <code>to_wallet</code>, both carrying <code>transfer_id</code>) so the transfer shows up naturally in a recent-activity feed. Validation rejects <code>to_wallet_id === from_wallet_id</code> and any wallet not owned by the requester.</p>
+
+      <h3>6.5 — Notifications fire on real events</h3>
+      <p><code>TransactionService::create()</code> and <code>TransferService::create()</code> both call into <code>NotificationService</code> inside the same DB transaction, so a rolled-back financial operation never leaves an orphan notification:</p>
+      <ul>
+        <li>Every created transaction fires a <em>New Income</em> / <em>New Expense</em> notification.</li>
+        <li>Every completed transfer fires one <em>Transfer Completed</em> notification (not two — a transfer isn't two events from the user's point of view).</li>
+        <li><strong>Low-balance crossing</strong>: if a wallet's balance was above 100.00 and the operation brings it to or below 100.00, a one-time <code>low_balance</code> notification fires — only on the crossing, not on every subsequent transaction while it stays low.</li>
+      </ul>
+
+      <h3>6.6 — Dashboard numbers exclude transfers</h3>
+      <p><code>total_income</code>/<code>total_expense</code> and the chart series explicitly <code>whereNull('transfer_id')</code>. Moving money between your own wallets is a zero-sum reallocation, not real income or spending — including the mirror transactions would inflate both numbers every time a user moved money internally. <code>total_balance</code> is unaffected either way, since transfers are zero-sum by construction.</p>
+      <p>The dashboard repository queries via <code>DB::table('transactions')</code> rather than the Eloquent model, so grouped/aggregated rows don't get the model's <code>type</code> enum cast applied to a raw aggregate column, and soft-deleted rows are excluded explicitly since bypassing Eloquent also bypasses its global soft-delete scope.</p>
+    </section>
+
+    <section id="api-reference">
+      <h2><span class="num">07</span> API reference</h2>
+      <p>All routes are under <code>/api/v1</code>.</p>
+
+      <h3>Auth</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/auth/register</td><td><span class="auth-pill auth-public">Public</span></td><td>Creates user (pending) + profile + default cash wallet; sends registration OTP</td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/auth/login</td><td><span class="auth-pill auth-public">Public</span></td><td>Throttled 6/min. Returns access+refresh token pair</td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/auth/logout</td><td><span class="auth-pill auth-bearer">Bearer</span></td><td>Revokes the current access token</td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/auth/refresh</td><td><span class="auth-pill auth-public">Public</span></td><td>Body: refresh_token. Rotates the pair</td></tr>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/auth/me</td><td><span class="auth-pill auth-bearer">Bearer</span></td><td>Current user + profile</td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/auth/forgot-password</td><td><span class="auth-pill auth-public">Public</span></td><td>Throttled 6/min. Issues a password_reset OTP</td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/auth/verify-otp</td><td><span class="auth-pill auth-public">Public</span></td><td>Throttled 6/min. purpose: registration|password_reset</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Wallets <span class="auth-pill auth-bearer" style="margin-left:0.4rem;">Bearer</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/wallets</td><td>List the user's wallets</td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/wallets</td><td><code>balance</code> is never accepted here — only Transactions/Transfers move it</td></tr>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/wallets/{wallet}</td><td></td></tr>
+            <tr><td><span class="method method-put">PUT</span></td><td class="mono">/wallets/{wallet}</td><td></td></tr>
+            <tr><td><span class="method method-delete">DELETE</span></td><td class="mono">/wallets/{wallet}</td><td>Soft delete; 422 if balance ≠ 0</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Transactions <span class="auth-pill auth-bearer" style="margin-left:0.4rem;">Bearer</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/transactions</td><td>Filters: type, category_id, wallet_id, date_from, date_to, search (matches note), per_page (max 100)</td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/transactions</td><td>category_id's type must match the transaction's type</td></tr>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/transactions/{transaction}</td><td></td></tr>
+            <tr><td><span class="method method-put">PUT</span></td><td class="mono">/transactions/{transaction}</td><td>422 if the transaction is transfer-linked</td></tr>
+            <tr><td><span class="method method-delete">DELETE</span></td><td class="mono">/transactions/{transaction}</td><td>Soft delete; reverses balance effect; 422 if transfer-linked</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Transfers <span class="auth-pill auth-bearer" style="margin-left:0.4rem;">Bearer</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/transfers</td><td></td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/transfers</td><td>from_wallet_id ≠ to_wallet_id, both owned by the requester</td></tr>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/transfers/{transfer}</td><td>No update/delete — transfers are immutable</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Categories <span class="auth-pill auth-bearer" style="margin-left:0.4rem;">Bearer</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/categories</td><td>Filter: type=income|expense. Read-only reference data</td></tr>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/categories/{category}</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Dashboard <span class="auth-pill auth-bearer" style="margin-left:0.4rem;">Bearer</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/dashboard/summary</td><td>total_balance, total_income, total_expense. Optional date_from/date_to (default: this month)</td></tr>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/dashboard/chart</td><td>period=weekly|monthly (default weekly). Gap-filled series</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Notifications <span class="auth-pill auth-bearer" style="margin-left:0.4rem;">Bearer</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method method-get">GET</span></td><td class="mono">/notifications</td><td>Filter: unread_only=1</td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/notifications/{notification}/read</td><td></td></tr>
+            <tr><td><span class="method method-post">POST</span></td><td class="mono">/notifications/read-all</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="envelope">
+      <h2><span class="num">08</span> Envelope &amp; localization</h2>
+      <p>Every response is <code>{ data, message, meta?, links? }</code>. Errors are <code>{ message, errors? }</code>.</p>
+      <p>Send <code>Accept-Language: ar</code> to get Arabic messages — this covers Laravel's own validation strings (fully translated in <code>lang/ar/validation.php</code>, <code>auth.php</code>, <code>passwords.php</code>) as well as this app's own domain messages (<code>lang/{en,ar}/api.php</code>). Locale is resolved by <code>SetLocaleFromHeader</code> middleware, restricted to <code>en</code>/<code>ar</code>, falling back to the app default for anything else.</p>
+    </section>
+
+    <section id="testing">
+      <h2><span class="num">09</span> Testing</h2>
+      <p>29 tests across Unit + Feature suites, covering: register → OTP → login → refresh-rotation → logout; wallet default-switching and the funded-wallet delete guard; transaction balance math including the category-mismatch and insufficient-balance guards; transfer atomicity, mirror transactions, and the transfer-linked-transaction edit/delete lock; and cross-user 403/isolation checks throughout.</p>
+      <p>Tests run against a <strong>dedicated MySQL database</strong> (<code>test_fintech_app_testing</code>, configured in <code>phpunit.xml</code>), separate from the dev database. <code>RefreshDatabase</code> wraps each test in a transaction; a shared <code>CreatesAuthenticatedUser</code> trait drives the real register→verify-otp→login HTTP flow, reading the OTP from <code>meta.debug_otp_code</code>.</p>
+      <pre><code>php artisan test              # full suite
+php artisan test --testsuite=Feature</code></pre>
+      <div class="callout">
+        <span class="callout-title">Gotcha for anyone extending the tests</span>
+        Laravel's <code>AuthManager</code> caches the resolved Sanctum guard (and the guard caches its resolved user) for the lifetime of the test's application container. A single test that authenticates as two different users in sequence will otherwise silently keep returning the first user's identity on the second user's "authenticated" requests. The <code>authHeaders()</code> helper calls <code>$this-&gt;app['auth']-&gt;forgetGuards()</code> before every authenticated call specifically to defeat this — it's a test-harness artifact only (each real production request gets a fresh PHP process), but omitting it produces false negatives, or worse, false positives on authorization tests.
+      </div>
+    </section>
+
+    <section id="getting-started">
+      <h2><span class="num">10</span> Getting started</h2>
+      <pre><code>cp .env.example .env               # then set DB_* to your MySQL credentials
+composer install
+php artisan key:generate
+php artisan migrate --seed         # seeds wallet types + categories
+php artisan serve</code></pre>
+      <p>Create a second MySQL database for tests (name must match <code>phpunit.xml</code>'s <code>DB_DATABASE</code>) — <code>CREATE DATABASE test_fintech_app_testing;</code> — then <code>php artisan test</code>.</p>
+      <p>A ready-to-import Postman collection lives at <code>postman/Fintech-Wallet-API.postman_collection.json</code> — it drives the full register → verify → login → wallets → transactions → transfers → dashboard → notifications flow end-to-end with auto-chained tokens/ids, no manual copy-pasting required.</p>
+    </section>
+
+    <section id="limitations">
+      <h2><span class="num">11</span> Known limitations</h2>
+      <ul>
+        <li><code>NotificationType::PaymentSuccess</code>/<code>PaymentFailed</code> and the <code>devices</code> table (FCM tokens) are scaffolded but not wired to anything yet — there's no real payment gateway or push-notification dispatch in this project.</li>
+        <li><code>meta.debug_otp_code</code> is a deliberate development/testing convenience gated to non-production environments; it must not ship in a real deployment's <code>APP_ENV</code>.</li>
+        <li>The low-balance threshold (100.00), OTP TTL (10 min), access-token TTL (60 min), and refresh-token TTL (30 days) are constants in their respective Services, not yet exposed via <code>config/</code>. Worth promoting to config if they ever need to vary per environment.</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  Fintech Wallet API — technical reference. Source of truth is the codebase; this document is regenerated by hand alongside it.
+</footer>
+</body>
+</html>
